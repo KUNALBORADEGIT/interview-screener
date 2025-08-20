@@ -1,5 +1,6 @@
 # engine/services/interview.py
 from typing import Dict
+from pathlib import Path
 from engine.services.twilio_client import TwilioClient
 from engine.services.stt_service import STTService
 from engine.services.tts_service import TTSService
@@ -31,48 +32,57 @@ class InterviewService:
             if not questions:
                 raise ValueError("No questions found for this JD")
 
-            question_texts = [q.question for q in questions]
+            # Prepare candidate folders
+            base_dir = Path("static") / str(candidate_id)
+            q_dir = base_dir / "questions"
+            a_dir = base_dir / "answers"
+            q_dir.mkdir(parents=True, exist_ok=True)
+            a_dir.mkdir(parents=True, exist_ok=True)
 
-            # 3️⃣ Generate TTS audios (placeholder)
-            question_audios = [self.tts.text_to_speech(q) for q in question_texts]
+            question_audios = []
+            for q in questions:
+                audio_path = q_dir / f"{q.id}.mp3"
+                self.tts.text_to_speech(q.question, str(audio_path))
+                question_audios.append(str(audio_path))
 
-            # 4️⃣ Trigger Twilio call (placeholder)
+            # 3️⃣ Trigger Twilio call
             call_sid = self.twilio.call_and_play_audios(
-                candidate.phone, question_audios
+                candidate.id, candidate.phone, question_audios
             )
 
-            # 5️⃣ Create interview record
-            interview = Interview(candidate_id=candidate.id)
-            db.add(interview)
+            for q in questions:
+                interview = Interview(candidate_id=candidate.id, question_id=q.id)
+                db.add(interview)
             db.commit()
-            db.refresh(interview)
 
-            # 6️⃣ Return initial response
             return {
-                "interview_id": interview.id,
                 "candidate": candidate.name,
                 "phone": candidate.phone,
-                "questions": question_texts,
+                "questions": [q.question for q in questions],
                 "status": "in-progress",
                 "call_sid": call_sid,
             }
 
-        # # 2. Trigger phone call
-        # call_sid = self.twilio.call_and_ask_questions(
-        #     to=candidate.phone,
-        #     questions=questions,
-        # )
+            # # 3️⃣ Generate TTS audios (placeholder)
+            # question_audios = [self.tts.text_to_speech(q) for q in question_texts]
 
-        # # 3. Placeholder for answers
-        # interview = Interview(candidate_id=candidate.id, jd_id=jd.id, call_sid=call_sid)
-        # db.add(interview)
-        # db.commit()
-        # db.refresh(interview)
+            # # 4️⃣ Trigger Twilio call (placeholder)
+            # call_sid = self.twilio.call_and_play_audios(
+            #     candidate.phone, question_audios
+            # )
 
-        # return {
-        #     "interview_id": interview.id,
-        #     "candidate": candidate.name,
-        #     "phone": candidate.phone,
-        #     "questions": questions,
-        #     "status": "in-progress",
-        # }
+            # # 5️⃣ Create interview record
+            # interview = Interview(candidate_id=candidate.id)
+            # db.add(interview)
+            # db.commit()
+            # db.refresh(interview)
+
+            # # 6️⃣ Return initial response
+            # return {
+            #     "interview_id": interview.id,
+            #     "candidate": candidate.name,
+            #     "phone": candidate.phone,
+            #     "questions": question_texts,
+            #     "status": "in-progress",
+            #     "call_sid": call_sid,
+            # }
