@@ -47,18 +47,10 @@ async def twiml_interview(request: Request):
         # Speak the question
         response.say(question_text, voice="alice")
 
+        action_url = f"{settings.SERVICE_URL}/twiml/record_callback?candidate_id={candidate_id}&question_idx={question_idx}&question_ids={question_ids_param}"
+
         # Record response, increment question_idx in callback URL
-        response.record(
-            timeout=5,
-            max_length=120,
-            play_beep=True,
-            action=(
-                f"/twiml/record_callback?"
-                f"candidate_id={candidate_id}&"
-                f"question_idx={question_idx}&"
-                f"question_ids={question_ids_param}"
-            ),
-        )
+        response.record(timeout=5, max_length=120, play_beep=True, action=action_url)
     else:
         response.say("Thank you! Interview complete.")
 
@@ -70,6 +62,9 @@ async def record_callback(request: Request):
     """
     Twilio record callback: save recording and move to next question.
     """
+    logger.info(
+        "$$$$$$$$$$$$$$$$$$$ Received TwiML record callback $$$$$$$$$$$$$$$$$$$"
+    )
     form = await request.form()
     recording_url = form.get("RecordingUrl")
     call_sid = form.get("CallSid")
