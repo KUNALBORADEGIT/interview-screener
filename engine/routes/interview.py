@@ -16,7 +16,7 @@ class InterviewRequest(BaseModel):
 async def trigger_interview(request: InterviewRequest):
     service = InterviewService()
     try:
-        result = await service.start_interview(
+        result = service.start_interview(
             candidate_id=request.candidate_id, jd_id=request.jd_id
         )
         return {"status": "success", "data": result}
