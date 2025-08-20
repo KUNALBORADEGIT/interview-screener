@@ -1,0 +1,50 @@
+@startuml
+title Recruitment & Interview Engine Architecture
+
+package "FastAPI Engine" {
+    [JobDescription API]
+    [Candidate API]
+    [Interview API]
+    [Twiml API]
+    [Static Files]
+}
+
+package "Engine/Model" {
+    [Candidate]
+    [Interview]
+    [JobDescription]
+    [Question]
+    [Recommendation]
+    [JDToQS]
+}
+
+package "Engine/Services" {
+    [InterviewService]
+    [LLMClient]
+    [ResumeParser]
+    [STTService]
+    [TTSService]
+    [TwilioClient]
+}
+
+' Relationships
+[JobDescription API] --> [LLMClient] : Generate Questions
+[JobDescription API] --> [JobDescription]
+[LLMClient] --> [Question]
+[LLMClient] --> [JDToQS]
+
+[Candidate API] --> [ResumeParser] : Parse Resume
+[ResumeParser] --> [LLMClient] : Extract Candidate Info
+[LLMClient] --> [Candidate]
+
+[Interview API] --> [InterviewService] : Trigger Interview
+[InterviewService] --> [TwilioClient] : Call Candidate
+[TwilioClient] --> [Twiml API] : Loop Call / Record Callback
+[Twiml API] --> [STTService] : Convert Audio -> Text
+[STTService] --> [Interview]
+[InterviewService] --> [LLMClient] : Score Calculation
+[LLMClient] --> [Recommendation]
+
+[Candidate API] --> [Recommendation] : Get Overall Result
+
+@enduml
