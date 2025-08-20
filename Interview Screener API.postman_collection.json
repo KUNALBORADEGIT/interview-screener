@@ -1,0 +1,176 @@
+{
+	"info": {
+		"_postman_id": "4666c64d-8687-4cea-9334-91f8b93d2c15",
+		"name": "Interview Screener API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29279616"
+	},
+	"item": [
+		{
+			"name": "Test_LLM",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://interview-screener.onrender.com/llm/ask?q=Write a short paragraph on AI in cybersecurity",
+					"protocol": "https",
+					"host": [
+						"interview-screener",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"llm",
+						"ask"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "Write a short paragraph on AI in cybersecurity"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload_JD",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "text",
+							"value": "We are hiring a Python developer with experience in FastAPI and SQLAlchemy...",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://interview-screener.onrender.com/jobdescription/upload",
+					"protocol": "https",
+					"host": [
+						"interview-screener",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"jobdescription",
+						"upload"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Trigger_Interview",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"candidate_id\": 1,\n  \"jd_id\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://interview-screener.onrender.com/interview/trigger",
+					"protocol": "https",
+					"host": [
+						"interview-screener",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"interview",
+						"trigger"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload_Resume",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/kunalborade/Profile/Kunal_Borade.pdf"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://interview-screener.onrender.com/candidates/resume",
+					"protocol": "https",
+					"host": [
+						"interview-screener",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"candidates",
+						"resume"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Result",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "",
+							"value": "",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "https://interview-screener.onrender.com/candidates/result?candidate_id=1",
+					"protocol": "https",
+					"host": [
+						"interview-screener",
+						"onrender",
+						"com"
+					],
+					"path": [
+						"candidates",
+						"result"
+					],
+					"query": [
+						{
+							"key": "candidate_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
