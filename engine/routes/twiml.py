@@ -2,14 +2,14 @@ from fastapi import APIRouter, Request
 from fastapi.responses import Response
 from twilio.twiml.voice_response import VoiceResponse
 
+from engine.core.logger import logger
+
 router = APIRouter()
 
 
 @router.get("/interview")
 async def twiml_interview(request: Request):
-    print(
-        "###################### Received TwiML request for interview ######################"
-    )
+    logger("############### Received TwiML request for interview #############")
     files_param = request.query_params.get("files", "")
     files = files_param.split(",")
 
@@ -29,9 +29,7 @@ async def twiml_interview(request: Request):
 
 @router.post("/record_callback")
 async def record_callback(request: Request):
-    print(
-        "###################### Received TwiML record callback ######################"
-    )
+    logger("######### Received TwiML record callback #################")
     form = await request.form()
     recording_url = form.get("RecordingUrl")
     call_sid = form.get("CallSid")
