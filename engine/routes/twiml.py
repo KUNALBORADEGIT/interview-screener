@@ -101,15 +101,25 @@ async def record_callback(request: Request):
 
     # 2️⃣ Generate score via LLM
     score = None
+
     try:
         if answer_text and question_text:
             prompt = (
                 f"Question: {question_text}\n"
                 f"Candidate Answer: {answer_text}\n"
-                "Evaluate the answer and provide a score from 0 to 10."
+                "Evaluate the answer and provide a score from 0 to 10 (just the number)."
             )
             llm = LLMClient()
-            score = await llm.ask(prompt)
+            raw_score = await llm.ask(prompt)  # if LLMClient.ask is async
+
+            # Extract first numeric value from response
+            import re
+
+            match = re.search(r"\d+(\.\d+)?", raw_score)
+            if match:
+                score = float(match.group(0))
+            else:
+                score = None
     except Exception as e:
         logger.error(f"LLM scoring failed: {e}")
 
