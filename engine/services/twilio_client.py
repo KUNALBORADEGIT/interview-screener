@@ -2,6 +2,7 @@ from twilio.rest import Client
 from engine.core.config import settings
 from engine.core.logger import logger
 from urllib.parse import quote
+from typing import List
 
 
 class TwilioClient:
@@ -11,24 +12,36 @@ class TwilioClient:
         self.auth_token = settings.TWILIO_AUTH_TOKEN
         self.client = Client(self.account_sid, self.auth_token)
 
-    def call_and_play_audios(self, candidate_phone: str, public_urls: list[str]) -> str:
+    def call_and_play_questions(
+        self,
+        candidate_phone: str,
+        candidate_id: int,
+        question_ids: List[int],
+    ) -> str:
         """
-        Makes a call and plays a sequence of audio files from public URLs.
+        Makes a call and passes question IDs to the TwiML endpoint.
+        The TwiML endpoint will fetch the actual questions from the DB.
         Returns the Twilio Call SID.
         """
         logger.info(
-            f"Calling {candidate_phone} and playing {len(public_urls)} audio files..."
+            f"Calling {candidate_phone} with {len(question_ids)} questions (candidate_id={candidate_id})"
         )
 
-        # URL-encode each file URL for safety
-        encoded_files = [quote(url, safe="") for url in public_urls]
-        files_param = ",".join(encoded_files)
+        # Encode IDs for URL safety
+        encoded_ids = [quote(str(qid), safe="") for qid in question_ids]
+        questions_param = ",".join(encoded_ids)
+
+        # Construct TwiML URL
+        twiml_url = (
+            f"{settings.SERVICE_URL}/twiml/interview?"
+            f"candidate_id={candidate_id}&question_ids={questions_param}"
+        )
 
         try:
             call = self.client.calls.create(
                 to=candidate_phone,
                 from_=self.from_phone,
-                url=f"{settings.SERVICE_URL}/twiml/interview?files={files_param}",
+                url=twiml_url,
                 method="POST",  # Ensure Twilio POSTs
             )
             return call.sid
