@@ -108,10 +108,8 @@ async def record_callback(request: Request):
                 f"Candidate Answer: {answer_text}\n"
                 "Evaluate the answer and provide a score from 0 to 10."
             )
-            # Assuming you have a wrapper to call your LLM
-
             llm = LLMClient()
-            score = llm.ask(prompt)
+            score = await llm.ask(prompt)
     except Exception as e:
         logger.error(f"LLM scoring failed: {e}")
 
