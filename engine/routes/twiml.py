@@ -123,7 +123,7 @@ async def record_callback(request: Request):
                 candidate_id=candidate_id,
                 question_id=question_ids[question_idx],
                 audio_url=recording_url,
-                answer_text=answer_text,
+                transcript=answer_text,
                 score=score,
             )
             db.add(interview)
