@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.get("/interview")
 async def twiml_interview(request: Request):
-    logger("############### Received TwiML request for interview #############")
+    logger.info("############### Received TwiML request for interview #############")
     files_param = request.query_params.get("files", "")
     files = files_param.split(",")
 
@@ -29,7 +29,7 @@ async def twiml_interview(request: Request):
 
 @router.post("/record_callback")
 async def record_callback(request: Request):
-    logger("######### Received TwiML record callback #################")
+    logger.info("######### Received TwiML record callback #################")
     form = await request.form()
     recording_url = form.get("RecordingUrl")
     call_sid = form.get("CallSid")

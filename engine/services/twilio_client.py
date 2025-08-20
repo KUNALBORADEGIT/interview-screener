@@ -15,7 +15,7 @@ class TwilioClient:
         Makes a call and plays a sequence of audio files from public URLs.
         Returns the Twilio Call SID.
         """
-        logger(
+        logger.info(
             f"Calling {candidate_phone} and playing {len(public_urls)} audio files..."
         )
 
@@ -30,5 +30,5 @@ class TwilioClient:
             )
             return call.sid
         except Exception as e:
-            logger(f"Twilio call failed: {e}")
+            logger.error(f"Twilio call failed: {e}")
             raise
