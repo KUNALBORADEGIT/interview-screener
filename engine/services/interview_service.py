@@ -15,8 +15,10 @@ class InterviewService:
         self.stt = STTService()
         self.tts = TTSService()
 
-    async def start_interview(self, candidate_id: int, jd_id: int) -> Dict:
-        with SessionLocal() as db:
+    def start_interview(self, candidate_id: int, jd_id: int) -> Dict:
+        # Open DB session
+        db = SessionLocal()
+        try:
             # 1️⃣ Fetch candidate
             candidate = db.query(Candidate).filter_by(id=candidate_id).first()
             if not candidate:
@@ -32,34 +34,38 @@ class InterviewService:
             if not questions:
                 raise ValueError("No questions found for this JD")
 
-            # Prepare candidate folders
-            base_dir = Path("static") / str(candidate_id)
+            # 3️⃣ Prepare candidate folders (absolute paths)
+            base_dir = Path(settings.BASE_DIR) / "static" / str(candidate_id)
             q_dir = base_dir / "questions"
             a_dir = base_dir / "answers"
             q_dir.mkdir(parents=True, exist_ok=True)
             a_dir.mkdir(parents=True, exist_ok=True)
 
-            # Generate audio files and their public URLs
+            # 4️⃣ Generate audio files and their public URLs
             public_urls = []
             for idx, q in enumerate(questions):
                 file_name = f"tts_{idx}.mp3"
                 audio_path = q_dir / file_name
+                # Ensure parent folder exists (extra safety)
+                audio_path.parent.mkdir(parents=True, exist_ok=True)
                 self.tts.text_to_speech(q.question, str(audio_path))
 
-                # Construct the full public URL here
+                # Construct the full public URL
                 public_url = f"{settings.SERVICE_URL}/static/{candidate_id}/questions/{file_name}"
                 public_urls.append(public_url)
 
-            # 3️⃣ Trigger Twilio call with the public URLs
+            # 5️⃣ Trigger Twilio call with the public URLs
             call_sid = self.twilio.call_and_play_audios(
                 candidate_phone=candidate.phone, public_urls=public_urls
             )
 
+            # 6️⃣ Save interviews in DB
             for q in questions:
                 interview = Interview(candidate_id=candidate.id, question_id=q.id)
                 db.add(interview)
             db.commit()
 
+            # 7️⃣ Return result
             return {
                 "candidate": candidate.name,
                 "phone": candidate.phone,
@@ -67,3 +73,5 @@ class InterviewService:
                 "status": "in-progress",
                 "call_sid": call_sid,
             }
+        finally:
+            db.close()
