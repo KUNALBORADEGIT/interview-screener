@@ -17,7 +17,8 @@ class Settings(BaseSettings):
 
     LOG_DIR: str = str(Path(__file__).parent.parent / "logs")
 
-    BASE_DIR: str = str(Path(__file__).parent.parent.resolve())
+    # BASE_DIR: str = str(Path(__file__).parent.parent.resolve())
+    BASE_DIR: str = str(Path(__file__).resolve().parent.parent.parent)
 
     class Config:
         env_file = ".env"
