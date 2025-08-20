@@ -27,7 +27,7 @@ class TwilioClient:
             call = self.client.calls.create(
                 to=to,
                 from_=self.from_phone,
-                url=f"https://{settings.SERVICE_URL}/twiml/interview?files={files_param}",
+                url=f"{settings.SERVICE_URL}/twiml/interview?files={files_param}",
             )
             return call.sid
         except Exception as e:
