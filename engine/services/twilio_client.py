@@ -1,6 +1,7 @@
 from twilio.rest import Client
 from engine.core.config import settings
 from engine.core.logger import logger
+from urllib.parse import quote
 
 
 class TwilioClient:
@@ -19,14 +20,16 @@ class TwilioClient:
             f"Calling {candidate_phone} and playing {len(public_urls)} audio files..."
         )
 
-        # Join URLs for TwiML parameter
-        files_param = ",".join(public_urls)
+        # URL-encode each file URL for safety
+        encoded_files = [quote(url, safe="") for url in public_urls]
+        files_param = ",".join(encoded_files)
 
         try:
             call = self.client.calls.create(
                 to=candidate_phone,
                 from_=self.from_phone,
                 url=f"{settings.SERVICE_URL}/twiml/interview?files={files_param}",
+                method="POST",  # Ensure Twilio POSTs
             )
             return call.sid
         except Exception as e:
