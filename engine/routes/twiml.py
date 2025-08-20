@@ -84,7 +84,7 @@ async def record_callback(request: Request):
             interview = Interview(
                 candidate_id=candidate_id,
                 question_id=question_ids[question_idx],
-                recording_url=recording_url,
+                audio_url=recording_url,
             )
             db.add(interview)
             db.commit()
