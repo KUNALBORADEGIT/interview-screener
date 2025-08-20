@@ -14,8 +14,10 @@ def include_routers(app: FastAPI):
     app.include_router(candidate.router, prefix="/candidates", tags=["candidates"])
     app.include_router(interview.router, prefix="/interview", tags=["interview"])
     app.include_router(twiml.router, prefix="/twiml", tags=["twiml"])
-    app.mount(
-        "/static",
-        StaticFiles(directory=Path(settings.BASE_DIR) / "static"),
-        name="static",
-    )
+
+    # Ensure static folder exists (auto-create if missing)
+    static_path = Path(settings.BASE_DIR) / "static"
+    static_path.mkdir(parents=True, exist_ok=True)
+
+    # Mount static files
+    app.mount("/static", StaticFiles(directory=static_path), name="static")
