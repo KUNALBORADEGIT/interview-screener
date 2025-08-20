@@ -7,7 +7,7 @@ from engine.core.logger import logger
 router = APIRouter()
 
 
-@router.get("/interview")
+@router.post("/interview")
 async def twiml_interview(request: Request):
     logger.info("############### Received TwiML request for interview #############")
     files_param = request.query_params.get("files", "")
