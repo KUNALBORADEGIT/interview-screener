@@ -9,6 +9,8 @@ from engine.models import Candidate, Interview, Question, JDToQS
 from pathlib import Path
 from engine.services.llm_client import LLMClient
 from engine.services.stt_service import STTService
+from sqlalchemy import func
+from engine.models import Recommendation
 
 router = APIRouter()
 
@@ -155,5 +157,18 @@ async def record_callback(request: Request):
         )
     else:
         response.say("Thank you! Interview complete.")
+        total_score = (
+            db.query(func.avg(Interview.score))
+            .filter(Interview.candidate_id == candidate_id)
+            .scalar()
+        )
+        recommendation_text = "hire" if total_score and total_score >= 7 else "reject"
+        rec = Recommendation(
+            candidate_id=candidate_id,
+            overall_score=total_score or 0,
+            recommendation=recommendation_text,
+        )
+        db.add(rec)
+        db.commit()
 
     return Response(content=str(response), media_type="application/xml")

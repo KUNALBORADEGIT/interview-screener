@@ -4,8 +4,13 @@ from sqlalchemy.orm import Session
 import os, shutil, uuid
 
 from engine.db.session import get_db
-from engine.models.candidate import Candidate
+from engine.models import Candidate, Recommendation, Interview
 from engine.services.resume_parser import ResumeParser
+
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
+from engine.db.session import SessionLocal
+
 
 router = APIRouter()
 
@@ -65,3 +70,54 @@ async def upload_resume(
         "resume_url": candidate.resume_url,
         "parsed_data": parsed_data,  # optional, helps debugging
     }
+
+
+@router.get("/result")
+async def result(candidate_id: int):
+    """
+    Fetch candidate interview results, scores, and recommendation.
+    """
+    db = SessionLocal()
+    try:
+        # Fetch all interview entries for candidate
+        interviews = (
+            db.query(Interview).filter(Interview.candidate_id == candidate_id).all()
+        )
+        if not interviews:
+            raise HTTPException(
+                status_code=404, detail="No interviews found for this candidate"
+            )
+
+        # Collect each question answer and score
+        interview_results = [
+            {
+                "question_id": i.question_id,
+                "transcript": i.transcript,
+                "audio_url": i.audio_url,
+                "score": i.score,
+            }
+            for i in interviews
+        ]
+
+        # Fetch recommendation if exists
+        recommendation = (
+            db.query(Recommendation)
+            .filter(Recommendation.candidate_id == candidate_id)
+            .first()
+        )
+        rec_data = None
+        if recommendation:
+            rec_data = {
+                "overall_score": recommendation.overall_score,
+                "recommendation": recommendation.recommendation,
+            }
+
+        return JSONResponse(
+            {
+                "candidate_id": candidate_id,
+                "interviews": interview_results,
+                "recommendation": rec_data,
+            }
+        )
+    finally:
+        db.close()
